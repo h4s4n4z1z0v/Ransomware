@@ -9,6 +9,7 @@
 Bu Python script, hədəf sistemdəki sənədləri AES-GCM alqoritmi ilə şifrələyir. AES şifrələmə açarını isə RSA public key vasitəsilə şifrələyərək hücumçunun əlində gizlətmək üçün nəzərdə tutulub.
 
 Əsas addımlar:
+
 ✅ AES-128 açarı yarat  
 ✅ AES açarını RSA ilə şifrələ  
 ✅ İstifadəçinin `Documents`, `Pictures`, `Desktop` qovluqlarındakı bütün faylları şifrələ  
