@@ -1,0 +1,22 @@
+✅ Bu kodda olan xüsusiyyətlər
+Xüsusiyyət	İzah
+🧠 AES şifrələmə	Fayllar AES-GCM ilə şifrələnir (güclü və sürətli)
+🔐 RSA ilə AES açarının şifrələnməsi	AES açarı public key ilə şifrələnir – qurban onu aça bilməz
+🧾 Ransom note (təhdid məktubu)	Masaüstünə .txt faylı ilə yazılır
+🛠 Persistensiya (Startup-a özünü kopyalama)	Windows sistemlərində açılışda işləmək üçün özünü sistemə yerləşdirir
+🕵️‍♂️ Anti-VM yoxlaması	Virtual mühitdə işlədiyini aşkar edərsə, icranı dayandırır
+🧹 Self-deletion (özünü silmə)	Hücumun sonunda kod özünü silir – forensik analizə qarşı tədbirdir
+📁 Hədəf qovluqların seçilməsi	Sadəcə Documents, Desktop, Pictures kimi şəxsi qovluqları şifrələyir
+❌ Sistem fayllarının qorunması	.exe, .dll fayllar şifrələnmir – bu da "zərər vermədən təzyiq" metodudur
+
+❌ Bu kodda olmayan xüsusiyyətlər
+Xüsusiyyət	Niyə önəmlidir	Bu kodda varmı?
+📡 C2 serverlə əlaqə	Hücumdan sonra AES açarı C2-yə göndərilməlidir	Yox – kodda bu hissə qeyd olunub, amma implement olunmayıb
+📤 Məlumat oğurlanması (data exfiltration)	Real ransomware-lər bəzən faylları oğurlayır	Yox
+🪞 Polimorfizm / Obfuscation	Antiviruslardan yayınmaq üçün kod özünü dəyişir	Yox
+🧪 Antivirus bypass texnikaları	Process Hollowing, DLL Injection, Signed Binary Proxy və s.	Yox
+🪟 GUI ransom pəncərəsi	Qurbanı yönləndirmək üçün istifadəçi interfeysi	Yox – yalnız .txt faylı yazılır
+📂 Bütün disk və ya şəbəkə resurslarının skan edilməsi	Real ransomware-lər daha geniş əhatəli olur	Yox – yalnız ~/Documents, ~/Desktop və s.
+📷 Shadow copy silinməsi	Fayl bərpa imkanlarını sıradan çıxarır	Yox
+🔄 LAN-da yayılma (wormable behavior)	Digər sistemlərə yayılır	Yox
+💰 RaaS infrastrukturu (Panel, Dashboard və s.)	Peşəkar ransomware-lər xidmət kimi satılır	Yox
